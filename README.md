@@ -1,1 +1,1 @@
-cerver-connect
+**cerver-connect** is an all in one solution, presented in a nice and interactive GUI that aims to provide fully management capabilities for your remote cerver in a fast and secure way. You can track usage and performance, resources, get direct access to current running processes and monitor memory, perform actions, such as start, stop, restart, shutdown, and many other commands that you can customize.
