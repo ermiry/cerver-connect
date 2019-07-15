@@ -36,6 +36,7 @@ struct _Client {
     u16 n_fds;                  // n of active fds in the pollfd array
     u32 poll_timeout;   
 
+    // threadpool *thpool;
     threadpool thpool;
 
     // only used in a game server
@@ -45,9 +46,25 @@ struct _Client {
     // all the actions that have been registered to a client
     DoubleList *registered_actions;
 
+    // custom packet hanlders
+    Action app_packet_handler;
+    Action app_error_packet_handler;
+    Action custom_packet_handler;
+
+    struct tm *time_started;
+    u64 uptime;
+
 };
 
 typedef struct _Client Client;
+
+extern void client_set_poll_timeout (Client *client, u32 timeout);
+
+// sets a cutom app packet hanlder and a custom app error packet handler
+extern void cerver_set_app_handlers (Client *client, Action app_handler, Action app_error_handler);
+
+// sets a custom packet handler
+extern void cerver_set_custom_handler (Client *client, Action custom_handler);
 
 // creates a new client, whcih may be used to create connections
 extern Client *client_create (void);
@@ -55,7 +72,8 @@ extern Client *client_create (void);
 // stops any activae connection and destroys a client
 extern u8 client_teardown (Client *client);
 
-extern void client_set_poll_timeout (Client *client, unsigned int timeout);
+// returns a connection assocaited with a socket
+extern Connection *client_connection_get_by_socket (Client *client, i32 sock_fd);
 
 // returns a connection (registered to a client) by its name
 extern Connection *client_connection_get_by_name (Client *client, const char *name);

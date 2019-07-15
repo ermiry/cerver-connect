@@ -5,6 +5,8 @@
 
 #include "cengine/cerver/packets.h"
 
+struct _Packet;
+
 typedef enum ErrorType {
 
     ERR_SERVER_ERROR = 0,   // internal server error, like no memory
@@ -34,7 +36,7 @@ extern Error *error_new (const char *msg);
 extern void error_delete (void *ptr);
 
 // handles error packets
-extern void error_packet_handler (Packet *packet);
+extern void error_packet_handler (struct _Packet *packet);
 
 // serialized error data
 typedef struct SError {

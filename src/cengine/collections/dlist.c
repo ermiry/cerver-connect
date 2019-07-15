@@ -18,11 +18,11 @@ static ListElement *list_element_new (void) {
 
 static inline void list_element_delete (ListElement *le) { if (le) free (le); }
 
-void dlist_set_compare (DoubleList *list, int (*compare)(void *one, void *two)) { if (list) list->compare = compare; }
+void dlist_set_compare (DoubleList *list, int (*compare)(const void *one, const void *two)) { if (list) list->compare = compare; }
 
 void dlist_set_destroy (DoubleList *list, void (*destroy)(void *data)) { if (list) list->destroy = destroy; }
 
-DoubleList *dlist_init (void (*destroy)(void *data), int (*compare)(void *one, void *two)) {
+DoubleList *dlist_init (void (*destroy)(void *data), int (*compare)(const void *one, const void *two)) {
 
     DoubleList *list = (DoubleList *) malloc (sizeof (DoubleList));
 
@@ -267,7 +267,7 @@ static ListElement *dllist_split (ListElement *head) {
 }  
 
 // Function to merge two linked lists 
-static ListElement *dllist_merge (int (*compare)(void *one, void *two), 
+static ListElement *dllist_merge (int (*compare)(const void *one, const void *two), 
     ListElement *first, ListElement *second)  { 
 
     // If first linked list is empty 
@@ -294,7 +294,8 @@ static ListElement *dllist_merge (int (*compare)(void *one, void *two),
 } 
 
 // merge sort
-static ListElement *dlist_merge_sort (ListElement *head, int (*compare)(void *one, void *two)) {
+static ListElement *dlist_merge_sort (ListElement *head, 
+    int (*compare)(const void *one, const void *two)) {
 
     if (!head || !head->next) return head;
 
