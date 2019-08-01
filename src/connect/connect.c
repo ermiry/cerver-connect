@@ -89,7 +89,7 @@ int cerver_connect_end (void) {
 
     validation_end ();
 
-    manager->curr_state->onExit ();
+    manager->curr_state->on_exit ();
     manager_delete (manager);
 
     cengine_end ();

@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <string.h>
+#include <stdbool.h>
 
 #include "cengine/types/types.h"
 
@@ -138,12 +139,16 @@ void client_event_unregister (Client *client, ClientEventType event_type) {
 // register to trigger an action when the specified event occurs
 // if there is an existing action registered to an event, it will be overrided
 void client_event_register (Client *client, ClientEventType event_type, 
-    Action action, void *action_args, Action delete_action_args) {
+    Action action, void *action_args, Action delete_action_args, 
+    bool create_thread, bool drop_after_trigger) {
 
     if (client) {
         if (client->registered_actions) {
             ClientEvent *event = client_event_new ();
             if (event) {
+                event->create_thread = create_thread;
+                event->drop_after_trigger = drop_after_trigger;
+
                 event->event_type = event_type;
                 event->action = action;
                 event->action_args = action_args;
@@ -182,9 +187,11 @@ void client_event_trigger (Client *client, ClientEventType event_type) {
         if (event) {
             // trigger the action
             if (event->action) {
-                thread_create_detachable ((void *(*)(void *)) event->action, 
-                    client_event_data_new (event));
-                client_event_pop (client->registered_actions, le);
+                if (event->create_thread) {
+                    thread_create_detachable ((void *(*)(void *)) event->action, 
+                        client_event_data_new (event));
+                }
+                if (event->drop_after_trigger) client_event_pop (client->registered_actions, le);
             }
         }
     }

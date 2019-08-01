@@ -28,9 +28,9 @@ static u8 game_end (void) {
 
 }
 
-static void game_onEnter (void) { game_init (); }
+static void game_on_enter (void) { game_init (); }
 
-static void game_onExit (void) { game_end (); }
+static void game_on_exit (void) { game_end (); }
 
 static void game_update (void) {
 
@@ -49,8 +49,8 @@ State *game_state_new (void) {
 
         new_game_state->update = NULL;
 
-        new_game_state->onEnter = game_onEnter;
-        new_game_state->onExit = game_onExit;
+        new_game_state->on_enter = game_on_enter;
+        new_game_state->on_exit = game_on_exit;
     }
 
 }

@@ -152,7 +152,7 @@ void cerver_packet_handler (Packet *packet) {
             RequestData *req = (RequestData *) (end);
 
             switch (req->type) {
-                case SERVER_INFO: {
+                case CERVER_INFO: {
                     #ifdef CLIENT_DEBUG
                     cengine_log_msg (stdout, LOG_DEBUG, LOG_NO_TYPE, "Recieved a cerver info packet.");
                     #endif
@@ -161,9 +161,18 @@ void cerver_packet_handler (Packet *packet) {
                         cengine_log_msg (stderr, LOG_ERROR, LOG_NO_TYPE, "Failed to correctly check cerver info!");
                 } break;
 
-                // TODO:
-                case SERVER_TEARDOWN:
-                    cengine_log_msg (stdout, LOG_WARNING, LOG_NO_TYPE, "\n---> Server teardown!! <---\n");
+                // the cerves is going to be teardown, we have to disconnect
+                case CERVER_TEARDOWN:
+                    #ifdef CLIENT_DEBUG
+                    cengine_log_msg (stdout, LOG_WARNING, LOG_NO_TYPE, "---> Server teardown! <---");
+                    #endif
+                    client_connection_end (packet->client, packet->connection);
+                    break;
+
+                case CERVER_STATS:
+                    break;
+
+                case CERVER_GAME_STATS:
                     break;
 
                 default: 

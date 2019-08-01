@@ -1,11 +1,20 @@
 #ifndef _CERVER_CLIENT_EVENTS_H_
 #define _CERVER_CLIENT_EVENTS_H_
 
+#include <stdbool.h>
+
 #include "cengine/types/types.h"
+
+#include "cengine/cerver/client.h"
 
 struct _Client;
 
 typedef enum ClientEventType {
+
+    EVENT_CERVER_INFO,          // received cerver info from the cerver
+    EVENT_CERVER_TEARDOWN,      // the cerver is going to teardown (disconnect happens automatically)
+    EVENT_CERVER_STATS,         // received cerver stats
+    EVENT_CERVER_GAME_STATS,    // received cerver game stats
 
     EVENT_SUCCESS_AUTH,         // auth with cerver has been successfull
 
@@ -20,6 +29,8 @@ typedef enum ClientEventType {
 typedef struct ClientEvent {
 
     ClientEventType event_type;         // the event we are waiting to happen
+    bool create_thread;                 // create a detachable thread to run action
+    bool drop_after_trigger;            // if we only want to trigger the event once
 
     // the request that triggered the event
     // this is usefull for custom events
@@ -39,7 +50,8 @@ extern void client_events_end (struct _Client *client);
 // register to trigger an action when the specified event occurs
 // if there is an existing action registered to an event, it will be overrided
 extern void client_event_register (struct _Client *client, ClientEventType event_type, 
-    Action action, void *action_args, Action delete_action_args);
+    Action action, void *action_args, Action delete_action_args, 
+    bool create_thread, bool drop_after_trigger);
 
 extern void client_event_set_response (struct _Client *client, ClientEventType event_type,
     void *response_data, Action delete_response_data);

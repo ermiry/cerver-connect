@@ -97,8 +97,8 @@ State *connect_state_new (void) {
 
         new_connect_state->update = NULL;
 
-        new_connect_state->onEnter = connect_on_enter;
-        new_connect_state->onExit = connect_on_exit;
+        new_connect_state->on_enter = connect_on_enter;
+        new_connect_state->on_exit = connect_on_exit;
     }
 
 }

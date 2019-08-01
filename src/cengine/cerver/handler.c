@@ -138,7 +138,7 @@ static void client_packet_handler (void *data) {
         // if (!packet_check (packet)) {
             switch (packet->header->packet_type) {
                 // handles cerver type packets
-                case SERVER_PACKET:
+                case CERVER_PACKET:
                     packet->client->stats->received_packets->n_cerver_packets += 1; 
                     cerver_packet_handler (packet); 
                     break;
