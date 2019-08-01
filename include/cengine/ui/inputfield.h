@@ -46,6 +46,9 @@ void ui_input_field_set_text (InputField *input, const char *text,
 // sets the input field's text color
 extern void ui_input_field_set_text_color (InputField *input, RGBA_Color color);
 
+// returns the current input text
+extern String *ui_input_field_get_input (InputField *input);
+
 // returns the actual password value
 extern String *ui_input_field_get_password (InputField *input);
 

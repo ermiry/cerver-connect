@@ -7,16 +7,16 @@
 
 int main (void) {
 
-    cengine_set_quit (connect_quit);
+    cengine_set_quit (cerver_connect_quit);
     cengine_assets_set_path ("./assets/");
 
-    running = !connect_init () ? true : false;
+    running = !cerver_connect_init () ? true : false;
 
     connect_state = connect_state_new ();
     manager = manager_new (connect_state);
 
     cengine_start (30);
 
-    return connect_end ();
+    return cerver_connect_end ();
 
 }

@@ -122,6 +122,13 @@ void ui_input_field_set_text_color (InputField *input, RGBA_Color color) {
 
 }
 
+// returns the current input text
+String *ui_input_field_get_input (InputField *input) {
+
+    if (input) return input->text->text;
+
+}
+
 // returns the actual password value
 String *ui_input_field_get_password (InputField *input) {
 

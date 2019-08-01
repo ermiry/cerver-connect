@@ -17,6 +17,11 @@
 #include "cengine/utils/utils.h"
 #include "cengine/utils/log.h"
 
+#include "connect/connect.h"
+#include "connect/validation.h"
+
+void cerver_disconnect_from_cerver (void);
+
 NotiCenter *main_noti_center = NULL;
 
 #pragma region public
@@ -28,7 +33,7 @@ static void cerver_connect_quit_signal (int dummy) { running = false; }
 void cerver_connect_die (const char *error) {
 
     cengine_log_msg (stderr, LOG_ERROR, LOG_NO_TYPE, error);
-    connect_quit ();
+    cerver_connect_quit ();
 
 };
 
@@ -72,11 +77,17 @@ int cerver_connect_init (void) {
 
     errors = cerver_connect_init_ui ();
 
+    errors = validation_init ();
+
     return errors;
 
 }
 
 int cerver_connect_end (void) {
+
+    cerver_disconnect_from_cerver ();
+
+    validation_end ();
 
     manager->curr_state->onExit ();
     manager_delete (manager);

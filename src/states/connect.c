@@ -1,3 +1,5 @@
+#include <stdlib.h>
+
 #include "cengine/types/types.h"
 #include "cengine/types/string.h"
 
@@ -15,6 +17,7 @@
 #include "cengine/ui/image.h"
 
 #include "connect/connect.h"
+#include "connect/validation.h"
 
 State *connect_state = NULL;
 
@@ -73,9 +76,6 @@ static u8 connect_init (void) {
 static void connect_update (void) {
 
     game_object_update_all ();
-
-    // update the camera
-    // camera_update (main_camera);
     
 }
 
@@ -105,11 +105,30 @@ State *connect_state_new (void) {
 
 static void connect_to_cerver (void *ptr) {
 
-    // TODO: sanitaize the input
+    String *ip = ui_input_field_get_input (ip_input);
 
-    if (!cerver_connect_to_cerver (ip_input->text->text->str, port_input->text->text->str)) {
-        // set notification
-        // exit connect state and enter game state
+    // check for valid ip
+    if (validation_check_value (ip_regex, ip->str)) {
+        // check for valid port
+        String *port = ui_input_field_get_input (port_input);
+        if (port->len > 0) {
+            int portnum = atoi (port->str);
+            if (!cerver_connect_to_cerver (ip->str, portnum)) {
+                // set notification
+                ui_notification_create_and_display (main_noti_center, NOTI_TYPE_SUCCESS, 5, false, 
+                    "Connected!", "Connected to cerver!");
+
+                // exit connect state and enter game state
+            }
+        }
+
+        else {
+            // set port error message
+        }
+    }
+
+    else {
+        // set ip error message
     }
 
 }
