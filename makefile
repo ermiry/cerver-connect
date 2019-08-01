@@ -4,10 +4,8 @@ SDL2 = `sdl2-config --cflags --libs` -l SDL2_image -l SDL2_ttf
 MATH = -lm 
 PTHREAD := -l pthread
 
-DEFINES = $(DEVELOPMENT)
-
 # development
-DEVELOPMENT = -D CERVER_DEBUG
+DEVELOPMENT = -D CENGINE_DEBUG -D CERVER_DEBUG
 
 CC          := gcc
 
@@ -19,9 +17,9 @@ SRCEXT      := c
 DEPEXT      := d
 OBJEXT      := o
 
-CFLAGS      := -g $(DEFINES)
+CFLAGS      := -g $(DEVELOPMENT)
 LIB         :=  $(PTHREAD) $(SDL2) $(MATH)
-INC         := -I $(INCDIR) -I /usr/local/include
+INC         := -I $(INCDIR) -I /usr/local/include $(LIB)
 INCDEP      := -I $(INCDIR)
 
 SOURCES     := $(shell find $(SRCDIR) -type f -name *.$(SRCEXT))
