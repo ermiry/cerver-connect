@@ -264,17 +264,19 @@ void client_connection_update (void *ptr) {
 void connection_end (Client *client, Connection *connection) {
 
     if (connection) {
-        connection->connected = false;
+        if (connection->connected) {
+            // send a close connection packet
+            Packet *packet = packet_generate_request (REQUEST_PACKET, CLIENT_CLOSE_CONNECTION, NULL, 0);
+            if (packet) {
+                packet_set_network_values (packet, client, connection);
+                packet_send (packet, 0, NULL);
+                packet_delete (packet);
+            }
 
-        // send a close connection packet
-        Packet *packet = packet_generate_request (REQUEST_PACKET, CLIENT_CLOSE_CONNECTION, NULL, 0);
-        if (packet) {
-            packet_set_network_values (packet, client, connection);
-            packet_send (packet, 0, NULL);
-            packet_delete (packet);
-        }
+            close (connection->sock_fd);
 
-        close (connection->sock_fd);
+            connection->connected = false;
+        } 
     } 
 
 }

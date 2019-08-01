@@ -120,6 +120,12 @@ static void connect_to_cerver (void *ptr) {
 
                 // exit connect state and enter game state
             }
+
+            // failed to connect to cerver
+            else {
+                ui_notification_create_and_display (main_noti_center, NOTI_TYPE_ERROR, 5, false,
+                    "Connection failed!", NULL);
+            }
         }
 
         else {
