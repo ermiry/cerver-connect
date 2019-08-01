@@ -21,18 +21,18 @@ NotiCenter *main_noti_center = NULL;
 
 #pragma region public
 
-void connect_quit (void) { running = false; }
+void cerver_connect_quit (void) { running = false; }
 
-static void connect_quit_signal (int dummy) { running = false; }
+static void cerver_connect_quit_signal (int dummy) { running = false; }
 
-void connect_die (const char *error) {
+void cerver_connect_die (const char *error) {
 
     cengine_log_msg (stderr, LOG_ERROR, LOG_NO_TYPE, error);
     connect_quit ();
 
 };
 
-static u8 connect_init_ui (void) {
+static u8 cerver_connect_init_ui (void) {
 
     u8 errors = 0;
 
@@ -57,26 +57,26 @@ static u8 connect_init_ui (void) {
 
 }
 
-int connect_init (void) {
+int cerver_connect_init (void) {
 
     int errors = 0;
 
     // register to some signals
-    signal (SIGINT, connect_quit_signal);
-    signal (SIGSEGV, connect_quit_signal);
+    signal (SIGINT, cerver_connect_quit_signal);
+    signal (SIGSEGV, cerver_connect_quit_signal);
 
     // main_settings = settings_load ();
 
     WindowSize window_size = { 1920, 1080 };
     errors = cengine_init ("Cerver Connect", window_size, false);
 
-    errors = connect_init_ui ();
+    errors = cerver_connect_init_ui ();
 
     return errors;
 
 }
 
-int connect_end (void) {
+int cerver_connect_end (void) {
 
     manager->curr_state->onExit ();
     manager_delete (manager);
@@ -94,23 +94,25 @@ int connect_end (void) {
 Client *client = NULL;
 Connection *main_connection = NULL;
 
-u8 connect_cerver_connect (const char *ip, u16 port) {
+u8 cerver_connect_to_cerver (const char *ip, u16 port) {
 
     u8 retval = 1;
 
-    client = client_create ();
-    if (client) {
-        client_connection_create (client, "main", 
-            ip, port, PROTOCOL_TCP, false);
-        main_connection = client_connection_get_by_name (client, "main");
-        retval = client_connection_start (client, main_connection);
+    if (ip) {
+        client = client_create ();
+        if (client) {
+            client_connection_create (client, "main", 
+                ip, port, PROTOCOL_TCP, false);
+            main_connection = client_connection_get_by_name (client, "main");
+            retval = client_connection_start (client, main_connection);
+        }
     }
 
     return retval;
 
 }
 
-void connect_cerver_disconnect (void) {
+void cerver_disconnect_from_cerver (void) {
 
     client_connection_end (client, main_connection);
     client_teardown (client);

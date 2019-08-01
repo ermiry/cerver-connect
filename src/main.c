@@ -2,7 +2,7 @@
 #include "cengine/manager/manager.h"
 
 #include "connect/connect.h"
-#include "states/login.h"
+#include "states/connect.h"
 #include "states/game.h"
 
 int main (void) {
@@ -12,10 +12,8 @@ int main (void) {
 
     running = !connect_init () ? true : false;
 
-    // login_state = login_state_new ();
-    // manager = manager_new (login_state);
-    game_state = game_state_new ();
-    manager = manager_new (game_state);
+    connect_state = connect_state_new ();
+    manager = manager_new (connect_state);
 
     cengine_start (30);
 
