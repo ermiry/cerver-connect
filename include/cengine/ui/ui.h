@@ -5,21 +5,22 @@
 
 #include "cengine/types/types.h"
 
-/*** COMMON HEX COLORS ***/
+/*** Common HEX colors ***/
 
 #define HEX_NO_COLOR        0x00000000
 #define HEX_WHITE           0xFFFFFFFF
 #define HEX_BLACK           0x000000FF
 
-#define HEX_FULL_GREEN      0x00FF00FF
 #define HEX_FULL_RED        0xFF0000FF
+#define HEX_FULL_GREEN      0x00FF00FF
+#define HEX_FULL_BLUE       0x0000FFFF
 
 #define HEX_YELLOW          0xFFD32AFF
 #define HEX_SAPPHIRE        0x1E3799FF
 
 #define HEX_SILVER          0xBDC3C7FF
 
-/*** COMMON RGBA COLORS ***/
+/*** Common RGBA Colors ***/
 
 typedef SDL_Color RGBA_Color;
 
@@ -30,13 +31,33 @@ extern RGBA_Color RGBA_RED;
 extern RGBA_Color RGBA_GREEN;
 extern RGBA_Color RGBA_BLUE;
 
-/*** UI ELEMENTS ***/
+/*** UI Positions */
+
+typedef enum UIPosition {
+
+    UI_POS_MIDDLE_CENTER = 0,
+
+    UI_POS_UPPER_CENTER,
+    UI_POS_RIGHT_UPPER_CORNER,
+    UI_POS_RIGHT_CENTER,
+    UI_POS_RIGHT_BOTTOM_CORNER,
+    UI_POS_BOTTOM_CENTER,
+    UI_POS_LEFT_BOTTOM_CORNER,
+    UI_POS_LEFT_CENTER,
+    UI_POS_LEFT_UPPER_CORNER
+
+} UIPosition;
+
+/*** UI Elements ***/
 
 typedef enum UIElementType {
 
     UI_TEXTBOX,
+    UI_IMAGE,
     UI_BUTTON,
     UI_INPUT,
+    UI_CHECK,
+    UI_NOTI_CENTER
 
 } UIElementType;
 
@@ -64,9 +85,19 @@ extern RGBA_Color ui_rgba_color_create (u8 r, u8 g, u8 b, u8 a);
 
 /*** Public ui funcs ***/
 
+// renders all the current active ui to the screen
 extern void ui_render (void);
 
+// initializes cengine's ui capabilities
 extern u8 ui_init (void);
+
+// sets the location of cengine's default ui assets
+extern void ui_default_assets_set_path (const char *pathname);
+
+// loads cengine's default ui assets
+extern u8 ui_default_assets_load (void);
+
+// destroys any cengine ui element left and deallocates memory
 extern u8 ui_destroy (void);
 
 #endif

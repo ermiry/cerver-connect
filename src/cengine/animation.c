@@ -372,7 +372,7 @@ int animations_init (void) {
 
     animators = dlist_init (animator_destroy_ref, animator_comparator);
     if (animators) {
-        if (thread_create_detachable (animations_update, NULL, "animations")) {
+        if (thread_create_detachable (animations_update, NULL)) {
             cengine_log_msg (stderr, LOG_ERROR, LOG_NO_TYPE, "Failed to create animations thread!");
             errors = 1;
         }

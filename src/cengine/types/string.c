@@ -24,8 +24,6 @@ String *str_new (const char *str) {
             string->str = (char *) calloc (string->len + 1, sizeof (char));
             char_copy (string->str, (char *) str);
         }
-
-        else string->str = NULL;
     }
 
     return string;
@@ -65,6 +63,7 @@ void str_delete (void *str_ptr) {
 
     if (str_ptr) {
         String *string = (String *) str_ptr;
+
         if (string->str) free (string->str);
         free (string);
     }
@@ -83,64 +82,21 @@ void str_copy (String *to, String *from) {
 
 }
 
-// concatenates two strings into a new one
 String *str_concat (String *s1, String *s2) {
 
-    String *des = NULL;
-
     if (s1 && s2) {
-        des = str_new (NULL);
+        String *des = str_new (NULL);
         des->str = (char *) calloc (s1->len + s2->len + 1, sizeof (char));
-        if (des->str) {
-            while (*s1->str) *des->str++ = *s1->str++;
-            while (*s2->str) *des->str++ = *s2->str++;
 
-            *des->str = '\0';
+        while (*s1->str) *des->str++ = *s1->str++;
+        while (*s2->str) *des->str++ = *s2->str++;
 
-            des->len = strlen (des->str);
-        }
+        *des->str = '\0';
 
-        else {
-            str_delete (des);
-            des = NULL;
-        } 
+        des->len = s1->len + s2->len;
     }
 
-    return des;
-
-}
-
-// appends a char to the end of the string
-// reallocates the same string
-void str_append_char (String *s, const char c) {
-
-    if (s) {
-        unsigned int new_len = s->len + 1;   
-
-        s->str = (char *) realloc (s->str, new_len);
-        if (s->str) {
-            char *des = s->str + (s->len);
-            *des = c;
-            s->len = new_len;
-        }
-    }
-
-}
-
-// appends a c string at the end of the string
-// reallocates the same string
-void str_append_c_string (String *s, const char *c_str) {
-
-    if (s && c_str) {
-        unsigned int new_len = s->len + strlen (c_str);
-
-        s->str = (char *) realloc (s->str, new_len);
-        if (s->str) {
-            char *des = s->str + (s->len);
-            char_copy (des, (char *) c_str);
-            s->len = new_len;
-        }
-    }
+    return NULL;
 
 }
 
@@ -156,11 +112,21 @@ void str_to_lower (String *string) {
 
 }
 
-int str_compare (const String *s1, const String *s2) { return strcmp (s1->str, s2->str); }
+int str_compare (const String *s1, const String *s2) { 
+
+    if (s1 && s2) return strcmp (s1->str, s2->str); 
+    else if (s1 && !s2) return -1;
+    else if (!s1 && s2) return 1;
+    return 0;
+    
+}
 
 int str_comparator (const void *a, const void *b) {
 
     if (a && b) return strcmp (((String *) a)->str, ((String *) b)->str);
+    else if (a && !b) return -1;
+    else if (!a && b) return 1;
+    return 0;
 
 }
 
@@ -220,34 +186,17 @@ void str_remove_char (String *string, char garbage) {
 
 }
 
-// removes the last char from a string
-void str_remove_last_char (String *s) {
-
-    if (s) {
-        if (s->len > 0) {
-            unsigned int new_len = s->len - 1;
-
-            s->str = (char *) realloc (s->str, s->len);
-            if (s->str) {
-                s->str[s->len - 1] = '\0';
-                s->len = new_len;
-            }
-        }
-    }
-
-}
-
-
 int str_contains (String *string, char *to_find) {
 
     int slen = string->len;
     int tFlen = strlen (to_find);
     int found = 0;
 
-    if (slen >= tFlen) {
+    if( slen >= tFlen )
+    {
         for (unsigned int s = 0, t = 0; s < slen; s++) {
             do {
-                if (string->str[s] == to_find[t]) {
+                if (string->str[s] == to_find[t] ) {
                     if (++found == tFlen) return 0;
                     s++;
                     t++;
@@ -267,7 +216,7 @@ int str_contains (String *string, char *to_find) {
 /*** serialization ***/
 
 // returns a ptr to a serialized string
-void *str_selialize (String *string, SStringSize size) {
+void *str_serialize (String *string, SStringSize size) {
 
     void *retval = NULL;
 

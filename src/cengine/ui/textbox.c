@@ -72,8 +72,10 @@ void ui_textbox_set_text (TextBox *textbox, const char *text,
 void ui_textbox_set_text_color (TextBox *textbox, RGBA_Color color) {
 
     if (textbox) {
-        textbox->text->text_color = color;
-        ui_text_component_draw (textbox->text);
+        if (textbox->text) {
+            textbox->text->text_color = color;
+            ui_text_component_draw (textbox->text);
+        }
     }
 
 }

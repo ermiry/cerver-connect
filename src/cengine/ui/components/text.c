@@ -64,7 +64,10 @@ void ui_text_component_init (Text *text, Font *font, unsigned int size, RGBA_Col
 // sets a new text for the component
 void ui_text_component_set_text (Text *text, const char *text_str) {
 
-    if (text) text->text = text_str ? str_new (text_str) : NULL;
+    if (text) {
+        str_delete (text->text);
+        text->text = text_str ? str_new (text_str) : NULL;
+    } 
 
 }
 

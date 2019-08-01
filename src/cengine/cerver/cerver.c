@@ -147,9 +147,9 @@ static u8 cerver_check_info (Cerver *cerver, Connection *connection) {
 void cerver_packet_handler (Packet *packet) {
 
     if (packet) {
-        if (packet->packet_size >= (sizeof (PacketHeader) + sizeof (RequestData))) {
-            char *end = packet->packet;
-            RequestData *req = (RequestData *) (end += sizeof (PacketHeader));
+        if (packet->data_size >= sizeof (RequestData)) {
+            char *end = (char *) packet->data;
+            RequestData *req = (RequestData *) (end);
 
             switch (req->type) {
                 case SERVER_INFO: {

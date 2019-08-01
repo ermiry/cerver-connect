@@ -89,4 +89,7 @@ typedef struct SStringXL {
 
 } SStringXL;
 
+// returns a ptr to a serialized string
+extern void *str_serialize (String *string, SStringSize size);
+
 #endif

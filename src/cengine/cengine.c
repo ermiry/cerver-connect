@@ -3,6 +3,8 @@
 
 #include <SDL2/SDL.h>
 
+#include "cengine/types/string.h"
+
 #include "cengine/animation.h"
 #include "cengine/input.h"
 #include "cengine/renderer.h"
@@ -18,12 +20,19 @@
 #include "cengine/utils/log.h"
 #include "cengine/utils/utils.h"
 
-bool running = true;
+/*** assets ***/
 
-unsigned int fps_limit = 30;
+const String *cengine_assets_path = NULL;
 
-unsigned int main_fps = 0;
-unsigned int update_fps = 0;
+// sets the path for the assets folder
+void cengine_assets_set_path (const char *pathname) {
+
+    if (cengine_assets_path) str_delete ((String *) cengine_assets_path);
+    cengine_assets_path = pathname ? str_new (pathname) : NULL;
+
+}
+
+/*** cengine ***/
 
 // TODO: create a similar function to sdl init to pass what we want to init
 int cengine_init (const char *window_title, WindowSize window_size, bool full_screen) {
@@ -67,15 +76,26 @@ int cengine_end (void) {
     animations_end ();
     thread_hub_end_global ();
 
+    str_delete ((String *) cengine_assets_path);
+
     SDL_Quit ();
 
     return 0;
 
 }
 
+/*** threads ***/
+
+bool running = true;
+
+unsigned int fps_limit = 30;
+
+unsigned int main_fps = 0;
+unsigned int update_fps = 0;
+
 static pthread_t update_thread;
 
-void *cengine_update (void *args) {
+static void *cengine_update (void *args) {
 
     thread_set_name ("update");
 
@@ -154,7 +174,7 @@ int cengine_start (int fps) {
 
     fps_limit = fps > 0 ? fps : 30;
 
-    if (thread_create_detachable (cengine_update, NULL, "update")) {
+    if (thread_create_detachable (cengine_update, NULL)) {
         cengine_log_msg (stderr, LOG_ERROR, LOG_NO_TYPE, "Failed to create update thread!");
         running = false;
     }
@@ -162,5 +182,16 @@ int cengine_start (int fps) {
     cengine_run ();
 
     return 0;
+
+}
+
+/*** other ***/
+
+void (*cengine_quit)(void) = NULL;
+
+// sets the function to be executed on SDL_QUIT event
+void cengine_set_quit (void (*quit)(void)) {
+
+    cengine_quit = quit;
 
 }

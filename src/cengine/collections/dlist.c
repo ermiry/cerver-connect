@@ -181,18 +181,25 @@ void *dlist_search (DoubleList *list, void *data) {
 
     if (list && data) {
         ListElement *ptr = dlist_start (list);
-        while (ptr != NULL) {
-            if (ptr->data == data) return ptr->data;
-            ptr = ptr->next;
+
+        if (list->compare) {
+            while (ptr != NULL) {
+                if (!list->compare (ptr->data, data)) return ptr;
+                ptr = ptr->next;
+            }
         }
 
-        return NULL;    // not found
+        else {
+            while (ptr != NULL) {
+                if (ptr->data == data) return ptr->data;
+                ptr = ptr->next;
+            }
+        }
     }
 
     return NULL;    
 
 }
-
 bool dlist_is_in_list (DoubleList *list, void *data) {
 
     if (list && data) {
