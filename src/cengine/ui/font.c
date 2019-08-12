@@ -400,7 +400,7 @@ u8 ui_fonts_init (void) {
 
 void ui_font_end (void) {
 
-    dlist_destroy (fonts);
+    dlist_delete (fonts);
     TTF_Quit ();
 
 }

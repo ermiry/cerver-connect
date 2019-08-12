@@ -107,7 +107,7 @@ typedef enum CerverPacket {
     CERVER_INFO                 = 0,
     CERVER_TEARDOWN             = 1,
 
-    CERVER_STATS                = 2,
+    CERVER_INFO_STATS           = 2,
     CERVER_GAME_STATS           = 3
 
 } CerverPacket;

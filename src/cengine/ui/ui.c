@@ -16,6 +16,7 @@
 #include "cengine/ui/font.h"
 #include "cengine/ui/textbox.h"
 #include "cengine/ui/image.h"
+#include "cengine/ui/panel.h"
 #include "cengine/ui/button.h"
 #include "cengine/ui/inputfield.h"
 #include "cengine/ui/check.h"
@@ -23,7 +24,7 @@
 
 #include "cengine/utils/log.h"
 
-/*** COMMON RGBA COLORS ***/
+/*** Common RGBA Colors ***/
 
 RGBA_Color RGBA_NO_COLOR = { 0, 0, 0, 0 };
 RGBA_Color RGBA_WHITE = { 255, 255, 255, 255 };
@@ -32,9 +33,9 @@ RGBA_Color RGBA_RED = { 255, 0, 0, 255 };
 RGBA_Color RGBA_GREEN = { 0, 255, 0, 255 };
 RGBA_Color RGBA_BLUE = { 0, 0, 255, 255 };
 
-/*** BASIC UI ELEMENTS ***/
+/*** Basic UI Elements ***/
 
-#pragma region BASIC UI ELEMENTS
+#pragma region Basic UI Elements
 
 UIRect ui_rect_create (u32 x, u32 y, u32 w, u32 h) {
 
@@ -51,25 +52,6 @@ UIRect ui_rect_union (UIRect a, UIRect b) {
     u32 y2 = MAX (a.y + a.h, b.y + b.h);
 
     UIRect retval = { x1, y1, MAX (0, x2 - x1), MAX (0, y2 - y1) };
-    return retval;
-
-}
-
-// FC_Default_RenderCallback
-UIRect ui_rect_render (SDL_Texture *srcTexture, UIRect *srcRect, u32 x, u32 y) {
-
-    UIRect retval;
-
-    SDL_RendererFlip flip = SDL_FLIP_NONE;
-    UIRect r = *srcRect;
-    UIRect dr = { x, y, r.w, r.h };
-    SDL_RenderCopyEx (main_renderer->renderer, srcTexture, &r, &dr, 0, NULL, flip);
-
-    retval.x = x;
-    retval.y = y;
-    retval.w = srcRect->w;
-    retval.h = srcRect->h;
-
     return retval;
 
 }
@@ -145,6 +127,7 @@ UIElement *ui_element_new (UIElementType type) {
     if (spot >= 0) {
         new_element = ui_elements[spot];
         new_element->id = spot;
+        new_element->active = true;
         new_element->type = type;
         new_element->element = NULL;
     }
@@ -156,6 +139,7 @@ UIElement *ui_element_new (UIElementType type) {
         if (new_element) {
             new_element->id = new_ui_element_id;
             new_element->type = type;
+            new_element->active = true;
             new_element->element = NULL;
             ui_elements[new_element->id] = new_element;
             new_ui_element_id++;
@@ -176,6 +160,7 @@ void ui_element_delete (UIElement *ui_element) {
             switch (ui_element->type) {
                 case UI_TEXTBOX: ui_textbox_delete (ui_element->element); break;
                 case UI_IMAGE: ui_image_delete (ui_element->element); break;
+                case UI_PANEL: ui_panel_delete (ui_element->element); break;
                 case UI_BUTTON: ui_button_delete (ui_element->element); break;
                 case UI_INPUT: ui_input_field_delete (ui_element->element); break;
                 case UI_CHECK: ui_check_delete (ui_element->element); break;
@@ -241,34 +226,40 @@ u8 ui_default_assets_load (void) {
 void ui_render (void) {
 
     for (u32 i = 0; i < curr_max_ui_elements; i++) {
-        switch (ui_elements[i]->type) {
-            case UI_TEXTBOX: {
-                ui_textbox_draw ((TextBox *) ui_elements[i]->element);
+        if (ui_elements[i]->active) {
+            switch (ui_elements[i]->type) {
+                case UI_TEXTBOX: {
+                    ui_textbox_draw ((TextBox *) ui_elements[i]->element);
+                }
+                break;
+
+                case UI_IMAGE: {
+                    ui_image_draw ((Image *) ui_elements[i]->element);
+                } break;
+
+                case UI_PANEL: {
+                    ui_panel_draw ((Panel *) ui_elements[i]->element);
+                } break;
+
+                case UI_BUTTON: {
+                    ui_button_draw ((Button *) ui_elements[i]->element);
+                }
+                break;
+
+                case UI_INPUT: {
+                    ui_input_field_draw ((InputField *) ui_elements[i]->element);
+                } break;
+
+                case UI_CHECK: {
+                    ui_check_draw ((Check *) ui_elements[i]->element);
+                } break;
+
+                case UI_NOTI_CENTER: {
+                    ui_noti_center_draw ((NotiCenter *) ui_elements[i]->element);
+                } break;
+
+                default: break;
             }
-            break;
-
-            case UI_IMAGE: {
-                ui_image_draw ((Image *) ui_elements[i]->element);
-            } break;
-
-            case UI_BUTTON: {
-                ui_button_draw ((Button *) ui_elements[i]->element);
-            }
-            break;
-
-            case UI_INPUT: {
-                ui_input_field_draw ((InputField *) ui_elements[i]->element);
-            } break;
-
-            case UI_CHECK: {
-                ui_check_draw ((Check *) ui_elements[i]->element);
-            } break;
-
-            case UI_NOTI_CENTER: {
-                ui_noti_center_draw ((NotiCenter *) ui_elements[i]->element);
-            } break;
-
-            default: break;
         }
     }
 

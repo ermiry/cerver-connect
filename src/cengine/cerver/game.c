@@ -57,7 +57,7 @@ void lobby_delete (void *lobby_ptr) {
 
         str_delete (lobby->id);
         game_settings_delete (lobby->game_settings);
-        dlist_destroy (lobby->players);
+        dlist_delete (lobby->players);
 
         free (lobby);
     }

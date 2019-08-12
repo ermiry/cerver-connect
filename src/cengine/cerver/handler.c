@@ -64,8 +64,6 @@ void client_connection_aux_delete (ClientConnection *cc) { if (cc) free (cc); }
 
 #pragma region handlers
 
-// TODO: create a way to register to different events such as success auth, to avoid creating
-// an specific placeholder for every action we might wanna need to trigger when something happens
 static void client_auth_packet_handler (Packet *packet) {
 
     if (packet) {
@@ -88,34 +86,6 @@ static void client_auth_packet_handler (Packet *packet) {
             }
         }
     }
-
-}
-
-// FIXME: 
-void auth_packet_handler (Packet *packet) {
-
-    // char *end = pack_info->packetData;
-    // RequestData *reqdata = (RequestData *) (end += sizeof (PacketHeader));
-
-    // switch (reqdata->type) {
-    //     case CLIENT_AUTH_DATA: {
-    //         Token *tokenData = (Token *) (end += sizeof (RequestData));
-    //         #ifdef CLIENT_DEBUG 
-    //         cengine_log_msg (stdout, LOG_DEBUG, CLIENT,
-    //             c_string_create ("Token recieved from server: %s", tokenData->token));
-    //         #endif  
-    //         Token *token_data = (Token *) malloc (sizeof (Token));
-    //         memcpy (token_data->token, tokenData->token, sizeof (token_data->token));
-    //         pack_info->connection->server->token_data = token_data;
-    //     } break;
-    //     case SUCCESS_AUTH: {
-    //         cengine_log_msg (stdout, LOG_SUCCESS, CLIENT, "Client authenticated successfully to server!");
-    //         if (pack_info->connection->successAuthAction)
-    //             pack_info->connection->successAuthAction (pack_info->connection->successAuthArgs);  
-    //     } break;
-    //     default: break;
-    // }
-    // break;
 
 }
 
@@ -152,7 +122,7 @@ static void client_packet_handler (void *data) {
                 // handles authentication packets
                 case AUTH_PACKET: 
                     packet->client->stats->received_packets->n_auth_packets += 1;
-                    auth_packet_handler (packet); 
+                    client_auth_packet_handler (packet); 
                     break;
 
                 // handles a request made from the server
@@ -237,6 +207,8 @@ static SockReceive *client_receive_handle_spare_packet (Client *client, Connecti
                     connection->sock_receive->spare_packet = NULL;
                     connection->sock_receive->missing_packet = 0;
                 }
+
+                else connection->sock_receive->missing_packet -= copy_to_spare;
 
                 // offset for the buffer
                 if (copy_to_spare < buffer_size) *end += copy_to_spare;

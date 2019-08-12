@@ -2,6 +2,9 @@
 #include <stdio.h>
 #include <stdbool.h>
 
+#include <SDL2/SDL_rect.h>
+#include <SDL2/SDL_render.h>
+
 #include "cengine/types/types.h"
 #include "cengine/types/string.h"
 
@@ -14,6 +17,7 @@
 #include "cengine/ui/font.h"
 #include "cengine/ui/notification.h"
 #include "cengine/ui/components/text.h"
+#include "cengine/ui/components/transform.h"
 
 #pragma region Notification
 
@@ -28,6 +32,8 @@ static Notification *ui_notification_new (void) {
 
         noti->title = NULL;
         noti->msg = NULL;
+
+        noti->transform = NULL;
 
         noti->life = timer_new ();
     }
@@ -45,6 +51,8 @@ void ui_notification_delete (void *noti_ptr) {
 
         ui_text_component_delete (noti->title);
         ui_text_component_delete (noti->msg);
+
+        ui_transform_component_delete (noti->transform);
 
         timer_destroy (noti->life);
 
@@ -263,6 +271,7 @@ Notification *ui_notification_create (NotificationType type, float lifetime, boo
         noti->type = type;
         ui_notification_get_color (noti);
         noti->lifetime = lifetime;
+        noti->transform = ui_transform_component_create (0, 0, 0, 0);
 
         Font *default_font = ui_font_get_default ();
 
@@ -305,21 +314,21 @@ Notification *ui_notification_create (NotificationType type, float lifetime, boo
 static void ui_notification_update_pos (Notification *noti) {
 
     if (noti) {
-        u32 y_pos = noti->bgrect.y;
+        u32 y_pos = noti->transform->rect.y;
 
         if (noti->timestamp_text) {
-            noti->timestamp_text->rect.y = noti->bgrect.y;
-            y_pos += noti->timestamp_text->rect.h;
+            noti->timestamp_text->transform->rect.y = noti->transform->rect.y;
+            y_pos += noti->timestamp_text->transform->rect.h;
         }
 
         if (noti->title) {
-            noti->title->rect.y = noti->timestamp_text ? 
-                y_pos : noti->bgrect.y;
-                y_pos += noti->title->rect.h;
+            noti->title->transform->rect.y = noti->timestamp_text ? 
+                y_pos : noti->transform->rect.y;
+                y_pos += noti->title->transform->rect.h;
         } 
 
         if (noti->msg) {
-            noti->msg->rect.y = y_pos;
+            noti->msg->transform->rect.y = y_pos;
         } 
     }
 
@@ -330,35 +339,38 @@ static void ui_notification_prepare_upper (NotiCenter *noti_center, Notification
 
     if (noti) {
         // prepare notification layout
-        noti->bgrect.w = noti_center->bgrect.w - 10;
-        noti->bgrect.x = noti_center->bgrect.x + 5;
-        noti->bgrect.y = noti_center->bgrect.y + 5;
+        noti->transform->rect.w = noti_center->transform->rect.w - 10;
+        noti->transform->rect.x = noti_center->transform->rect.x + 5;
+        noti->transform->rect.y = noti_center->transform->rect.y + 5;
 
         if (noti->timestamp_text) {
+            ui_text_component_set_wrap (noti->timestamp_text, noti->transform->rect.w);
             ui_text_component_draw (noti->timestamp_text);
 
-            noti->timestamp_text->rect.x = noti->bgrect.x;
-            noti->timestamp_text->rect.y = noti->bgrect.y;
+            noti->timestamp_text->transform->rect.x = noti->transform->rect.x;
+            noti->timestamp_text->transform->rect.y = noti->transform->rect.y;
 
-            noti->bgrect.h += noti->timestamp_text->rect.h;
+            noti->transform->rect.h += noti->timestamp_text->transform->rect.h;
         }
 
         if (noti->title) {
+            ui_text_component_set_wrap (noti->title, noti->transform->rect.w);
             ui_text_component_draw (noti->title);
 
-            noti->title->rect.x = noti->bgrect.x;
-            noti->title->rect.y = noti->timestamp_text ? noti->bgrect.y + (noti->bgrect.h) : noti->bgrect.y;
+            noti->title->transform->rect.x = noti->transform->rect.x;
+            noti->title->transform->rect.y = noti->timestamp_text ? noti->transform->rect.y + (noti->transform->rect.h) : noti->transform->rect.y;
 
-            noti->bgrect.h += noti->title->rect.h;
+            noti->transform->rect.h += noti->title->transform->rect.h;
         } 
 
         if (noti->msg) {
+            ui_text_component_set_wrap (noti->msg, noti->transform->rect.w);
             ui_text_component_draw (noti->msg);
 
-            noti->msg->rect.x = noti->bgrect.x;
-            noti->msg->rect.y = noti->title ? noti->bgrect.y + (noti->bgrect.h) : noti->bgrect.y;
+            noti->msg->transform->rect.x = noti->transform->rect.x;
+            noti->msg->transform->rect.y = noti->title ? noti->transform->rect.y + (noti->transform->rect.h) : noti->transform->rect.y;
 
-            noti->bgrect.h += noti->msg->rect.h;
+            noti->transform->rect.h += noti->msg->transform->rect.h;
         } 
     }
 
@@ -369,35 +381,39 @@ static void ui_notification_prepare_bottom (NotiCenter *noti_center, Notificatio
 
     if (noti) {
         // prepare notification layout
-        noti->bgrect.w = noti_center->bgrect.w - 10;
-        noti->bgrect.x = noti_center->bgrect.x + 5;
-        noti->bgrect.y = noti_center->bgrect.y + 5;
+        noti->transform->rect.w = noti_center->transform->rect.w - 10;
+        noti->transform->rect.x = noti_center->transform->rect.x + 5;
+        // noti->transform->rect.y = (noti_center->transform->rect.y + noti_center->transform->rect.h) - noti->transform->rect.h;
+        noti->transform->rect.y = noti_center->transform->rect.y;
 
         if (noti->timestamp_text) {
+            ui_text_component_set_wrap (noti->timestamp_text, noti->transform->rect.w);
             ui_text_component_draw (noti->timestamp_text);
 
-            noti->timestamp_text->rect.x = noti->bgrect.x;
-            noti->timestamp_text->rect.y = noti->bgrect.y + 5;
+            noti->timestamp_text->transform->rect.x = noti->transform->rect.x;
+            noti->timestamp_text->transform->rect.y = noti->transform->rect.y + 5;
 
-            noti->bgrect.h += noti->timestamp_text->rect.h;
+            noti->transform->rect.h += noti->timestamp_text->transform->rect.h;
         }
 
         if (noti->title) {
+            ui_text_component_set_wrap (noti->title, noti->transform->rect.w);
             ui_text_component_draw (noti->title);
 
-            noti->title->rect.x = noti->bgrect.x;
-            noti->title->rect.y = noti->timestamp_text ? noti->bgrect.y + (noti->bgrect.h) : noti->bgrect.y;
+            noti->title->transform->rect.x = noti->transform->rect.x;
+            noti->title->transform->rect.y = noti->timestamp_text ? noti->transform->rect.y + (noti->transform->rect.h) : noti->transform->rect.y;
 
-            noti->bgrect.h += noti->title->rect.h;
+            noti->transform->rect.h += noti->title->transform->rect.h;
         } 
 
         if (noti->msg) {
+            ui_text_component_set_wrap (noti->msg, noti->transform->rect.w);
             ui_text_component_draw (noti->msg);
 
-            noti->msg->rect.x = noti->bgrect.x;
-            noti->msg->rect.y = noti->title ? noti->bgrect.y + (noti->bgrect.h) : noti->bgrect.y;
+            noti->msg->transform->rect.x = noti->transform->rect.x;
+            noti->msg->transform->rect.y = noti->title ? noti->transform->rect.y + (noti->transform->rect.h) : noti->transform->rect.y;
 
-            noti->bgrect.h += noti->msg->rect.h;
+            noti->transform->rect.h += noti->msg->transform->rect.h;
         } 
     }
 
@@ -435,7 +451,7 @@ void ui_notification_create_and_display (NotiCenter *noti_center, NotificationTy
 static void ui_notification_draw (Notification *noti) {
 
     if (noti) {
-        render_basic_filled_rect (&noti->bgrect, noti->bgcolor);
+        render_basic_filled_rect (&noti->transform->rect, noti->bgcolor);
 
         if (noti->timestamp) ui_text_component_render (noti->timestamp_text);
         if (noti->title) ui_text_component_render (noti->title);
@@ -453,6 +469,11 @@ static NotiCenter *ui_noti_center_new (void) {
     NotiCenter *noti_center = (NotiCenter *) malloc (sizeof (NotiCenter));
     if (noti_center) {
         memset (noti_center, 0, sizeof (NotiCenter));
+        noti_center->ui_element = NULL;
+        noti_center->transform = NULL;
+        noti_center->bg_texture = NULL;
+        noti_center->colour = false;
+        noti_center->outline = false;
         noti_center->notifications = dlist_init (ui_notification_delete, NULL);
         noti_center->active_notifications = dlist_init (ui_notification_delete, NULL);
     }
@@ -465,8 +486,13 @@ void ui_noti_center_delete (void *noti_center_ptr) {
 
     if (noti_center_ptr) {
         NotiCenter *noti_center = (NotiCenter *) noti_center_ptr;
-        dlist_destroy (noti_center->notifications);
-        dlist_destroy (noti_center->active_notifications);
+
+        noti_center->ui_element = NULL;
+        ui_transform_component_delete (noti_center->transform);
+        if (noti_center->bg_texture) SDL_DestroyTexture (noti_center->bg_texture);
+        dlist_delete (noti_center->notifications);
+        dlist_delete (noti_center->active_notifications);
+
         free (noti_center);
     }
 
@@ -476,30 +502,22 @@ void ui_noti_center_delete (void *noti_center_ptr) {
 static void ui_noti_center_update_pos (NotiCenter *noti_center) {
 
     if (noti_center) {
-        u32 screen_width = main_renderer->window_size.width;
-        u32 screen_height = main_renderer->window_size.height;
-
-        switch (noti_center->ui_pos) {
-            case UI_POS_MIDDLE_CENTER: break;
-
-            case UI_POS_UPPER_CENTER: {
-                noti_center->bgrect.x = (screen_width / 2) - (noti_center->bgrect.w / 2);
-                noti_center->bgrect.y = 0;
+        switch (noti_center->transform->pos) {
+            case UI_POS_FREE: 
+            case UI_POS_MIDDLE_CENTER: 
                 noti_center->bottom = false;
-            } break;
-            case UI_POS_RIGHT_UPPER_CORNER: break;
-            case UI_POS_RIGHT_CENTER: break;
-            case UI_POS_RIGHT_BOTTOM_CORNER: break;
-            case UI_POS_BOTTOM_CENTER: break;
-            case UI_POS_LEFT_BOTTOM_CORNER: {
-                noti_center->bgrect.x = 0;
-                noti_center->bgrect.y = screen_height - noti_center->bgrect.h;
-                noti_center->bottom = true;
-            } break;
-            case UI_POS_LEFT_CENTER: break;
-            case UI_POS_LEFT_UPPER_CORNER: break;
+                break;
 
-            default: break;
+            case UI_POS_UPPER_CENTER: noti_center->bottom = false; break;
+            case UI_POS_RIGHT_UPPER_CORNER: noti_center->bottom = false; break;
+            case UI_POS_RIGHT_CENTER: noti_center->bottom = false; break;
+            case UI_POS_RIGHT_BOTTOM_CORNER: noti_center->bottom = true; break;
+            case UI_POS_BOTTOM_CENTER: noti_center->bottom = true; break;
+            case UI_POS_LEFT_BOTTOM_CORNER: noti_center->bottom = true; break;
+            case UI_POS_LEFT_CENTER: noti_center->bottom = false; break;
+            case UI_POS_LEFT_UPPER_CORNER: noti_center->bottom = false; break;
+
+            default: noti_center->bottom = false; break;
         }
     }
 
@@ -517,14 +535,16 @@ NotiCenter *ui_noti_center_create (u8 max_display, UIPosition pos) {
     if (ui_element) {
         noti_center = ui_noti_center_new ();
         if (noti_center) {
+            noti_center->ui_element = ui_element;
             noti_center->max_display = max_display;
-            noti_center->ui_pos = pos;
-
-            noti_center->bgrect.w = NOTI_CENTER_DEFAULT_WIDTH;
-            noti_center->bgrect.h = NOTI_CENTER_DEFAULT_HEIGHT;
+            noti_center->transform = ui_transform_component_create (0, 0, 
+                NOTI_CENTER_DEFAULT_WIDTH, NOTI_CENTER_DEFAULT_HEIGHT);
+            ui_transform_component_set_pos (noti_center->transform, NULL, pos);
 
             // adjust noti center postion values
             ui_noti_center_update_pos (noti_center);
+
+            noti_center->offset = noti_center->bottom ? noti_center->transform->rect.h : 0;
 
             ui_element->element = noti_center;
         }
@@ -540,7 +560,7 @@ NotiCenter *ui_noti_center_create (u8 max_display, UIPosition pos) {
 void ui_noti_center_set_position (NotiCenter *noti_center, UIPosition pos) {
 
     if (noti_center) {
-        noti_center->ui_pos = pos;
+        noti_center->transform->pos = pos;
         ui_noti_center_update_pos (noti_center);
     }
 
@@ -550,10 +570,30 @@ void ui_noti_center_set_position (NotiCenter *noti_center, UIPosition pos) {
 void ui_noti_center_set_dimensions (NotiCenter *noti_center, u32 width, u32 height) {
 
     if (noti_center) {
-        noti_center->bgrect.w = width;
-        noti_center->bgrect.h = height;
+        noti_center->transform->rect.w = width;
+        noti_center->transform->rect.h = height;
 
         ui_noti_center_update_pos (noti_center);
+    }
+
+}
+
+// sets the noti center's outline colour
+void ui_noti_center_set_ouline_colour (NotiCenter *noti_center, RGBA_Color colour) {
+
+    if (noti_center) {
+        noti_center->outline = true;
+        noti_center->outline_colour = colour;
+    }
+
+}
+
+// removes the ouline form the noti center
+void ui_noti_center_remove_outline (NotiCenter *noti_center) {
+
+    if (noti_center) {
+        memset (&noti_center->outline_colour, 0, sizeof (RGBA_Color));
+        noti_center->outline = false;
     }
 
 }
@@ -561,7 +601,31 @@ void ui_noti_center_set_dimensions (NotiCenter *noti_center, u32 width, u32 heig
 // sets the notification center background color
 void ui_noti_center_set_bg_color (NotiCenter *noti_center, RGBA_Color color) {
 
-    if (noti_center) noti_center->bgcolor = color;
+    if (noti_center) {
+        noti_center->bg_colour = color;
+        if (color.a < 255) {
+            noti_center->bg_texture = render_complex_transparent_rect (&noti_center->transform->rect, color);
+            noti_center->bg_texture_rect.w = noti_center->transform->rect.w;
+            noti_center->bg_texture_rect.h = noti_center->transform->rect.h;
+        }
+
+        noti_center->colour = true;
+    } 
+
+}
+
+// removes the background from the noticenter
+void ui_noti_center_remove_background (NotiCenter *noti_center) {
+
+    if (noti_center) {
+        if (noti_center->bg_texture) {
+            SDL_DestroyTexture (noti_center->bg_texture);
+            noti_center->bg_texture = NULL;
+        }
+
+        memset (&noti_center->bg_colour, 0, sizeof (RGBA_Color));
+        noti_center->colour = false;
+    }
 
 }
 
@@ -569,7 +633,19 @@ void ui_noti_center_set_bg_color (NotiCenter *noti_center, RGBA_Color color) {
 void ui_noti_center_draw (NotiCenter *noti_center) {
 
     if (noti_center) {
-        render_basic_outline_rect (&noti_center->bgrect, RGBA_WHITE);
+        // render the background
+        if (noti_center->bg_texture) {
+            SDL_RenderCopyEx (main_renderer->renderer, noti_center->bg_texture, 
+                &noti_center->bg_texture_rect, &noti_center->transform->rect, 
+                0, 0, SDL_FLIP_NONE);
+        }
+
+        else if (noti_center->colour) 
+            render_basic_filled_rect (&noti_center->transform->rect, noti_center->bg_colour);
+
+        // render the outline border
+        if (noti_center->outline) 
+            render_basic_outline_rect (&noti_center->transform->rect, noti_center->outline_colour);
 
         if (noti_center->active_notifications->size < noti_center->max_display) {
             if (noti_center->notifications->size > 0) {
@@ -578,13 +654,12 @@ void ui_noti_center_draw (NotiCenter *noti_center) {
                     noti = (Notification *) le->data;
                     
                     // check for available space in the notification center UI
-                    u32 new_height = noti_center->used_height + noti->bgrect.h;
-                    if (new_height <= noti_center->bgrect.h) {
+                    u32 new_height = noti_center->transform->rect.y + noti_center->offset;
+                    // if ((new_height + noti->transform->rect.h) < (noti_center->transform->rect.y + noti_center->transform->rect.h)) {
                         // adjust notification position values
-                        noti->bgrect.y = noti_center->used_height;
-                        ui_notification_update_pos (noti);
-                        
-                        noti_center->used_height += noti->bgrect.h;
+                        // noti->transform->rect.y = noti_center->bottom ? (new_height - noti->transform->rect.h) : new_height;
+                        // ui_notification_update_pos (noti);
+                        noti_center->offset -= noti->transform->rect.h;
 
                         // push the notification to the active ones
                         void *noti_data = dlist_remove_element (noti_center->notifications, le);
@@ -593,21 +668,33 @@ void ui_noti_center_draw (NotiCenter *noti_center) {
                         timer_start (((Notification *) noti_data)->life);
                         
                         if (noti_center->active_notifications->size >= noti_center->max_display) break;
-                    }
+                    // }
                 }
             }
         }
 
         // render & update the active notifications
         if (noti_center->active_notifications->size > 0) {
+            u32 offset = noti_center->bottom ? noti_center->transform->rect.h : 0;
             Notification *noti = NULL;
             for (ListElement *le = dlist_start (noti_center->active_notifications); le; le = le->next) {
                 noti = (Notification *) le->data;
+
+                u32 new_height = noti_center->transform->rect.y + offset;
+                noti->transform->rect.y = noti_center->bottom ? (new_height - noti->transform->rect.h) : new_height;
+                ui_notification_update_pos (noti);
+                offset -= noti->transform->rect.h;
+
                 ui_notification_draw (noti);
 
                 // check for lifetime
-                if ((timer_get_ticks (noti->life) / 1000) >= noti->lifetime) 
-                    dlist_remove_element (noti_center->active_notifications, le);
+                if ((timer_get_ticks (noti->life) / 1000) >= noti->lifetime) {
+                    // remove older notifications
+                    Notification *old_noti = (Notification *) dlist_remove_element (noti_center->active_notifications, le);
+                    noti_center->offset += old_noti->transform->rect.h;
+                    ui_notification_delete (old_noti);
+                    if (noti_center->active_notifications->size <= 0) break;
+                }   
             }       
         }
     }

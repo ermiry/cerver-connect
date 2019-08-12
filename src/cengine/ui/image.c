@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <string.h>
 #include <stdbool.h>
 
 #include "cengine/types/types.h"
@@ -14,7 +15,7 @@ static Image *ui_image_new (void) {
     Image *image = (Image *) malloc (sizeof (Image));
     if (image) {
         memset (image, 0, sizeof (Image));
-
+        image->ui_element = NULL;
         image->transform = NULL;
         image->sprite = NULL;
         image->sprite_sheet = NULL;
@@ -29,6 +30,7 @@ void ui_image_delete (void *image_ptr) {
     if (image_ptr) {
         Image *image = (Image *) image_ptr;
 
+        image->ui_element = NULL;
         ui_transform_component_delete (image->transform);
 
         if (image->ref_sprite) {
@@ -60,7 +62,10 @@ void ui_image_set_scale (Image *image, int x_scale, int y_scale) {
 }
 
 // sets the image's sprite to be rendered and loads its
-void ui_image_set_sprite (Image *image, const char *filename) {
+// returns 0 on success loading sprite, 1 on error
+u8 ui_image_set_sprite (Image *image, const char *filename) {
+
+    u8 retval = 1;
 
     if (image && filename) {
         if (!image->ref_sprite) sprite_destroy (image->sprite);
@@ -69,19 +74,28 @@ void ui_image_set_sprite (Image *image, const char *filename) {
         if (image->sprite) {
             image->transform->rect.w = image->sprite->w;
             image->transform->rect.h = image->sprite->h;
+            retval = 0;
         }
     }
+
+    return retval;
 
 }
 
 // sets the image's sprite sheet to be rendered and loads it
-void ui_image_set_sprite_sheet (Image *image, const char *filename) {
+// returns 0 on success loading sprite sheet, 1 on error
+u8 ui_image_set_sprite_sheet (Image *image, const char *filename) {
+
+    u8 retval = 1;
 
     if (image && filename) {
         if (!image->ref_sprite) sprite_sheet_destroy (image->sprite_sheet);
 
         image->sprite_sheet = sprite_sheet_load (filename, main_renderer);
+        if (image->sprite_sheet) retval = 0;
     }
+
+    return retval;
 
 }
 
@@ -129,6 +143,7 @@ Image *ui_image_create (u32 x, u32 y) {
     if (ui_element) {
         image = ui_image_new ();
         if (image) {
+            image->ui_element = ui_element;
             image->transform = ui_transform_component_create (x, y, 0, 0);
             ui_element->element = image;
         }

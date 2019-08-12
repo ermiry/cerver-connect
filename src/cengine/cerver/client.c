@@ -107,7 +107,7 @@ static Client *client_new (void) {
 static void client_delete (Client *client) {
 
     if (client) {
-        dlist_destroy (client->connections);
+        dlist_delete (client->connections);
 
         client_events_end (client);
 
@@ -119,7 +119,7 @@ static void client_delete (Client *client) {
 }
 
 // sets a cutom app packet hanlder and a custom app error packet handler
-void cerver_set_app_handlers (Client *client, Action app_handler, Action app_error_handler) {
+void client_set_app_handlers (Client *client, Action app_handler, Action app_error_handler) {
 
     if (client) {
         client->app_packet_handler = app_handler;
@@ -129,7 +129,7 @@ void cerver_set_app_handlers (Client *client, Action app_handler, Action app_err
 }
 
 // sets a custom packet handler
-void cerver_set_custom_handler (Client *client, Action custom_handler) {
+void client_set_custom_handler (Client *client, Action custom_handler) {
 
     if (client) client->custom_packet_handler = custom_handler;
 

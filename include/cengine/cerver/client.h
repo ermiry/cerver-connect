@@ -62,10 +62,10 @@ extern void client_set_poll_timeout (Client *client, u32 timeout);
 extern void client_set_thpool_n_threads (Client *client, u16 n_threads);
 
 // sets a cutom app packet hanlder and a custom app error packet handler
-extern void cerver_set_app_handlers (Client *client, Action app_handler, Action app_error_handler);
+extern void client_set_app_handlers (Client *client, Action app_handler, Action app_error_handler);
 
 // sets a custom packet handler
-extern void cerver_set_custom_handler (Client *client, Action custom_handler);
+extern void client_set_custom_handler (Client *client, Action custom_handler);
 
 // creates a new client, whcih may be used to create connections
 extern Client *client_create (void);
@@ -74,10 +74,10 @@ extern Client *client_create (void);
 extern u8 client_teardown (Client *client);
 
 // returns a connection assocaited with a socket
-extern Connection *client_connection_get_by_socket (Client *client, i32 sock_fd);
+extern struct _Connection *client_connection_get_by_socket (Client *client, i32 sock_fd);
 
 // returns a connection (registered to a client) by its name
-extern Connection *client_connection_get_by_name (Client *client, const char *name);
+extern struct _Connection *client_connection_get_by_name (Client *client, const char *name);
 
 // creates a new connection and registers it to the specified client;
 // the connection should be ready to be started
@@ -87,15 +87,15 @@ extern int client_connection_create (Client *client, const char *name,
 
 // registers an existing connection to a client
 // retuns 0 on success, 1 on error
-extern int client_connection_register (Client *client, Connection *connection);
+extern int client_connection_register (Client *client, struct _Connection *connection);
 
 // starts a client connection
 // returns 0 on success, 1 on error
-extern int client_connection_start (Client *client, Connection *connection);
+extern int client_connection_start (Client *client, struct _Connection *connection);
 
 // terminates and destroy a connection registered to a client
 // returns 0 on success, 1 on error
-extern int client_connection_end (Client *client, Connection *connection);
+extern int client_connection_end (Client *client, struct _Connection *connection);
 
 /*** Files ***/
 
@@ -131,12 +131,12 @@ extern u8 client_game_join_lobby (Client *client, struct _Connection *connection
 
 // request the cerver to leave the currect lobby
 // returns 0 on success sending request, 1 on failed to send request
-extern u8 client_game_leave_lobby (Client *client, Connection *connection,
+extern u8 client_game_leave_lobby (Client *client, struct _Connection *connection,
     const char *lobby_id);
 
 // requests the cerver to start the game in the current lobby
 // returns 0 on success sending request, 1 on failed to send request
-extern u8 client_game_start_lobby (Client *client, Connection *connection,
+extern u8 client_game_start_lobby (Client *client, struct _Connection *connection,
     const char *lobby_id);
 
 /*** Serialization ***/

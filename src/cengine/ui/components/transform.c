@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "cengine/ui/ui.h"
 #include "cengine/ui/components/transform.h"
 
 UITransform *ui_transform_component_new (void) {
@@ -14,6 +15,15 @@ UITransform *ui_transform_component_new (void) {
 void ui_transform_component_delete (void *transform_ptr) {
 
     if (transform_ptr) free (transform_ptr);
+
+}
+
+void ui_transform_component_set_pos (UITransform *transform, UIRect *ref_rect, UIPosition pos) {
+
+    if (transform) {
+        transform->pos = pos;
+        ui_position_update (transform, ref_rect);
+    } 
 
 }
 
@@ -42,6 +52,8 @@ UITransform *ui_transform_component_create (int x, int y, int w, int h) {
 
     UITransform *transform = ui_transform_component_new ();
     if (transform) {
+        transform->pos = UI_POS_FREE;
+
         transform->rect.x = x;
         transform->rect.y = y;
         transform->rect.w = w;

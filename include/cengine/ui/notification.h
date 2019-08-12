@@ -4,6 +4,9 @@
 #include <stdbool.h>
 #include <time.h>
 
+#include <SDL2/SDL_rect.h>
+#include <SDL2/SDL_render.h>
+
 #include "cengine/types/types.h"
 #include "cengine/collections/dlist.h"
 
@@ -12,6 +15,7 @@
 #include "cengine/ui/ui.h"
 #include "cengine/ui/font.h"
 #include "cengine/ui/components/text.h"
+#include "cengine/ui/components/transform.h"
 
 struct _NotiCenter;
 
@@ -46,7 +50,7 @@ typedef struct Notification {
     Text *msg;
 
     // background
-    UIRect bgrect;
+    UITransform *transform;
     RGBA_Color bgcolor;
 
     Timer *life;
@@ -127,17 +131,23 @@ extern void ui_notification_create_and_display (struct _NotiCenter *noti_center,
 
 struct _NotiCenter {
 
+    UIElement *ui_element;
+    UITransform *transform;
+
+    bool outline;
+    RGBA_Color outline_colour;
+
+    bool colour;
+    RGBA_Color bg_colour;
+    SDL_Texture *bg_texture;
+    SDL_Rect bg_texture_rect;
+
     DoubleList *notifications;          // notifications queue
     u8 max_display;                     // max notis to be displayed at once
     
-    DoubleList *active_notifications;   // notifications being displayed
-    u32 used_height;
-
-    UIPosition ui_pos;
     bool bottom;
-
-    UIRect bgrect;
-    RGBA_Color bgcolor;
+    DoubleList *active_notifications;   // notifications being displayed
+    u32 offset;
 
 };
 
@@ -156,8 +166,17 @@ extern void ui_noti_center_set_position (NotiCenter *noti_center, UIPosition pos
 // sets the notification center dimensions
 extern void ui_noti_center_set_dimensions (NotiCenter *noti_center, u32 width, u32 height);
 
+// sets the noti center's outline colour
+extern void ui_noti_center_set_ouline_colour (NotiCenter *noti_center, RGBA_Color colour);
+
+// removes the ouline form the noti center
+extern void ui_noti_center_remove_outline (NotiCenter *noti_center);
+
 // sets the notification center background color
 extern void ui_noti_center_set_bg_color (NotiCenter *noti_center, RGBA_Color color);
+
+// removes the background from the noticenter
+extern void ui_noti_center_remove_background (NotiCenter *noti_center);
 
  // draws the notification center
 extern void ui_noti_center_draw (NotiCenter *noti_center);

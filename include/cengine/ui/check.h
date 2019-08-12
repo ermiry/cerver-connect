@@ -5,6 +5,7 @@
 
 typedef struct Check {
 
+    UIElement *ui_element;
     UITransform *transform;
 
 } Check;

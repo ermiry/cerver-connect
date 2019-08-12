@@ -10,6 +10,8 @@
 
 typedef struct Image {
 
+    UIElement *ui_element;
+
     UITransform *transform;
 
     Sprite *sprite;
@@ -28,10 +30,12 @@ extern void ui_image_delete (void *image_ptr);
 extern void ui_image_set_scale (Image *image, int x_scale, int y_scale);
 
 // sets the image's sprite to be rendered and loads its
-extern void ui_image_set_sprite (Image *image, const char *filename);
+// returns 0 on success loading sprite, 1 on error
+extern u8 ui_image_set_sprite (Image *image, const char *filename);
 
 // sets the image's sprite sheet to be rendered and loads it
-extern void ui_image_set_sprite_sheet (Image *image, const char *filename);
+// returns 0 on success loading sprite sheet, 1 on error
+extern u8 ui_image_set_sprite_sheet (Image *image, const char *filename) ;
 
 // sets the image's sprite from a refrence from an already loaded sprite
 extern void ui_image_ref_sprite (Image *image, Sprite *sprite);

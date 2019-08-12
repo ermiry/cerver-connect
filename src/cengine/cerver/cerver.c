@@ -89,7 +89,6 @@ static u8 cerver_check_info (Cerver *cerver, Connection *connection) {
             #ifdef CLIENT_DEBUG
             cengine_log_msg (stdout, LOG_DEBUG, LOG_NO_TYPE, "Cerver is configured to use ipv6");
             #endif
-            // TODO: modify the connection to use ipv6
         }
 
         #ifdef CLIENT_DEBUG
@@ -117,26 +116,28 @@ static u8 cerver_check_info (Cerver *cerver, Connection *connection) {
             #ifdef CLIENT_DEBUG
             cengine_log_msg (stdout, LOG_DEBUG, LOG_NO_TYPE, "Cerver requires authentication.");
             #endif
-            if (connection->auth_action) {
-                #ifdef CLIENT_DEBUG
-                cengine_log_msg (stdout, LOG_DEBUG, LOG_NO_TYPE, "Sending auth data to cerver...");
-                #endif
-                connection->auth_action (connection->auth_data);
-                retval = 0;
-            }
+            // if (connection->auth_action) {
+            //     #ifdef CLIENT_DEBUG
+            //     cengine_log_msg (stdout, LOG_DEBUG, LOG_NO_TYPE, "Sending auth data to cerver...");
+            //     #endif
+            //     connection->auth_action (connection->auth_data);
+            //     retval = 0;
+            // }
 
-            else {
-                cengine_log_msg (stderr, LOG_WARNING, LOG_NO_TYPE, 
-                    "Can't authenticate with server --- no auth action neither auth data have been setup");
-            } 
+            // else {
+            //     cengine_log_msg (stderr, LOG_WARNING, LOG_NO_TYPE, 
+            //         "Can't authenticate with server --- no auth action neither auth data have been setup");
+            // } 
+
         }
 
         else {
             #ifdef CLIENT_DEBUG
             cengine_log_msg (stdout, LOG_DEBUG, LOG_NO_TYPE, "Cerver does not requires authentication.");
             #endif
-            retval = 0;
         }
+        
+        retval = 0;
     }
 
     return retval;
@@ -169,7 +170,7 @@ void cerver_packet_handler (Packet *packet) {
                     client_connection_end (packet->client, packet->connection);
                     break;
 
-                case CERVER_STATS:
+                case CERVER_INFO_STATS:
                     break;
 
                 case CERVER_GAME_STATS:

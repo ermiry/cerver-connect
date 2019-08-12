@@ -16,6 +16,8 @@ extern void str_delete (void *str_ptr);
 
 extern void str_copy (String *to, String *from);
 
+extern void str_replace (String *old, const char *str);
+
 // concatenates two strings into a new one
 extern String *str_concat (String *s1, String *s2);
 

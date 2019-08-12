@@ -1,6 +1,8 @@
 #ifndef _CENGINE_UI_H_
 #define _CENGINE_UI_H_
 
+#include <stdbool.h>
+
 #include <SDL2/SDL.h>
 
 #include "cengine/types/types.h"
@@ -31,29 +33,13 @@ extern RGBA_Color RGBA_RED;
 extern RGBA_Color RGBA_GREEN;
 extern RGBA_Color RGBA_BLUE;
 
-/*** UI Positions */
-
-typedef enum UIPosition {
-
-    UI_POS_MIDDLE_CENTER = 0,
-
-    UI_POS_UPPER_CENTER,
-    UI_POS_RIGHT_UPPER_CORNER,
-    UI_POS_RIGHT_CENTER,
-    UI_POS_RIGHT_BOTTOM_CORNER,
-    UI_POS_BOTTOM_CENTER,
-    UI_POS_LEFT_BOTTOM_CORNER,
-    UI_POS_LEFT_CENTER,
-    UI_POS_LEFT_UPPER_CORNER
-
-} UIPosition;
-
 /*** UI Elements ***/
 
 typedef enum UIElementType {
 
     UI_TEXTBOX,
     UI_IMAGE,
+    UI_PANEL,
     UI_BUTTON,
     UI_INPUT,
     UI_CHECK,
@@ -66,6 +52,7 @@ typedef enum UIElementType {
 typedef struct UIElement {
 
     i32 id;
+    bool active;
     UIElementType type;
     void *element;
 
@@ -79,7 +66,6 @@ typedef SDL_Rect UIRect;
 
 extern UIRect ui_rect_create (u32 x, u32 y, u32 w, u32 h);
 extern UIRect ui_rect_union (UIRect a, UIRect b);
-extern UIRect ui_rect_render (SDL_Texture *srcTexture, UIRect *srcRect, u32 x, u32 y);
 
 extern RGBA_Color ui_rgba_color_create (u8 r, u8 g, u8 b, u8 a);
 

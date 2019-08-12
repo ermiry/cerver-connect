@@ -161,7 +161,7 @@ void thread_hub_end (ThreadHub *hub) {
 
     if (hub) {
         str_delete (hub->name);
-        dlist_destroy (hub->threads);
+        dlist_delete (hub->threads);
 
         free (hub);
     }

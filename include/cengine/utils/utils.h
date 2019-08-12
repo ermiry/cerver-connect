@@ -2,6 +2,7 @@
 #define _CENGINE_UTILS_H_
 
 #include <stdbool.h>
+#include <stdint.h>
 
 /*** misc ***/
 
@@ -28,6 +29,8 @@ extern int random_int_in_range (int min, int max);
 extern int xtoi (char *hexString);
 
 extern char *itoa (int i, char *b);
+
+extern uint32_t convert_rgba_to_hex (uint8_t r, uint8_t g, uint8_t b, uint8_t a);
 
 /*** c strings ***/
 

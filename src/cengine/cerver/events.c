@@ -95,7 +95,7 @@ u8 client_events_init (Client *client) {
 
 void client_events_end (Client *client) { 
 
-    if (client) dlist_destroy (client->registered_actions);
+    if (client) dlist_delete (client->registered_actions);
 
 }
 
@@ -126,6 +126,7 @@ void client_event_unregister (Client *client, ClientEventType event_type) {
         if (client->registered_actions) {
             ClientEvent *event = NULL;
             for (ListElement *le = dlist_start (client->registered_actions); le; le = le->next) {
+                event = (ClientEvent *) le->data;
                 if (event->event_type == event_type) {
                     client_event_delete (dlist_remove_element (client->registered_actions, le));
                     break;
@@ -191,6 +192,11 @@ void client_event_trigger (Client *client, ClientEventType event_type) {
                     thread_create_detachable ((void *(*)(void *)) event->action, 
                         client_event_data_new (event));
                 }
+
+                else {
+                    event->action (client_event_data_new (event));
+                }
+                
                 if (event->drop_after_trigger) client_event_pop (client->registered_actions, le);
             }
         }

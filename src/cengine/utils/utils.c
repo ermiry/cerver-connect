@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
+#include <stdint.h>
 
 #include <ctype.h>
 #include <stdarg.h>
@@ -98,6 +99,18 @@ char *itoa (int i, char *b) {
 
     return b;
 
+}
+
+uint32_t convert_rgba_to_hex (uint8_t r, uint8_t g, uint8_t b, uint8_t a) {  
+
+    uint32_t retval = 0;
+
+    retval += (a << 24) & 0xff000000;
+    retval += (b << 16) & 0x00ff0000;
+    retval += (g << 8) & 0x0000ff00;
+    retval += (r) & 0x000000ff;
+
+    return retval;
 }
 
 /*** c strings ***/
